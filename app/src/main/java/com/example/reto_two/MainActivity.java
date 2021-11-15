@@ -1,13 +1,19 @@
 package com.example.reto_two;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.reto_two.model.EntrenadorPokemon;
 import com.example.reto_two.model.Pokemon;
@@ -26,6 +32,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_atrapar_pokemon,btn_buscar_pokemon;
     private RecyclerView recycler_pokemones;
     private ArrayList<Pokemon> pokemonArrayList;
+    private RelativeLayout relative_cagando;
+
+    private AlertDialog.Builder dialogBuilder;
+    private AlertDialog dialog;
+    boolean cargandoThread=true;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_atrapar_pokemon = (Button) findViewById(R.id.btn_atrapar_pokemon);
         btn_buscar_pokemon = (Button) findViewById(R.id.btn_buscar_pokemon);
         recycler_pokemones = (RecyclerView) findViewById(R.id.recycler_pokemones);
+        relative_cagando = (RelativeLayout) findViewById(R.id.relative_cagando);
 
         pokemonArrayList= new ArrayList<>();
         recycler_pokemones.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -67,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (existe){
             case EntrenadorPokemon.USUARIO_EXISTE:
+                relative_cagando.setVisibility(View.VISIBLE);
                 db.collection("Usuarios").document(username).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -84,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case EntrenadorPokemon.USUARIO_NO_EXISTE:
 
+                mensajeBienvenida(username);
+
                 ArrayList<Pokemon> pkms = new ArrayList();
                 pkms.add(new Pokemon("http://assets.stickpng.com/images/580b57fcd9996e24bc43c325.png",150,"Pikachu",100,120,200,123));
                 EntrenadorPokemon e = new EntrenadorPokemon(username,pkms);
@@ -96,17 +112,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void llenarPublicaciones(ArrayList<Pokemon> pokemons) {
 
-        AdaptadorPokemon adaptadorPublicacion=new AdaptadorPokemon(pokemons,getApplicationContext());
+
+
+        AdaptadorPokemon adaptadorPublicacion=new AdaptadorPokemon(pokemons,getApplicationContext(),MainActivity.this);
 
         adaptadorPublicacion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                Pokemon pokemon = pokemons.get(recycler_pokemones.getChildAdapterPosition(v));
+
+                Bundle bundle= new Bundle();
+                bundle.putSerializable("Pokemon",pokemon);
+
+                Intent abrirPerfilPokemon=new Intent(getApplicationContext(), PokemonActivity.class);
+                abrirPerfilPokemon.putExtras(bundle);
+                startActivity(abrirPerfilPokemon);
 
             }
         });
         recycler_pokemones.setAdapter(adaptadorPublicacion);
+
+        new Thread(
+                ()-> {
+                    while (cargandoThread) {
+                        try {
+                            Thread.sleep(1000);
+                            runOnUiThread(
+                                    () -> {
+                                        relative_cagando.setVisibility(View.GONE);
+                                        cargandoThread=false;
+                                    }
+                            );
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        ).start();
     }
+
+
+    private void mensajeBienvenida(String username){
+        dialogBuilder = new AlertDialog.Builder(this);
+        final View popup_bienvenida =  getLayoutInflater().inflate(R.layout.popup_bienvenida, null);
+
+        TextView tv_popup_bienvenida = (TextView) popup_bienvenida.findViewById(R.id.tv_popup_bienvenida);
+        tv_popup_bienvenida.setText("¡Hola "+username+", te damos la bienvenida a Pokémon POKEDEX! \n Esperamos que disfrutes el juego, y ¡atrapa a todos los Pokemons!");
+        dialogBuilder.setView(popup_bienvenida);
+        dialog = dialogBuilder.create();
+        dialog.show();
+
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -118,8 +176,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.btn_atrapar_pokemon:
 
+                String pokemonAtrapar = et_atrapa_pokemon.getText().toString();
+                if(!pokemonAtrapar.equals("")){
+                    atraparPokemonHTTP(pokemonAtrapar);
+                }else {
+                    Toast.makeText(getApplicationContext(),"Por favor ingresa un nombre válido",Toast.LENGTH_SHORT).show();
+                }
                 break;
 
         }
+    }
+
+    private void atraparPokemonHTTP(String pokemonAtrapar) {
+        new Thread(
+                ()->{
+                    HTTPSWebUtilDomi h = new HTTPSWebUtilDomi();
+                    h.GETrequest("https://geogameicesi.herokuapp.com/api/geo/set");
+                }
+        ).start();
     }
 }

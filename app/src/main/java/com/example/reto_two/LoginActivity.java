@@ -2,6 +2,7 @@ package com.example.reto_two;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -19,6 +20,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText et_username;
     private Button btn_ingresar;
+    private ProgressDialog iniciandoSesion ;
+
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -30,10 +33,13 @@ public class LoginActivity extends AppCompatActivity {
 
         et_username = (EditText) findViewById(R.id.et_username);
         btn_ingresar = (Button) findViewById(R.id.btn_ingresar);
-
+        iniciandoSesion = new ProgressDialog(this);
         btn_ingresar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                iniciandoSesion.setMessage("Iniciando Sesión...");
+                iniciandoSesion.show();
 
                 String username = et_username.getText().toString();
                 if(!username.equals("")){
@@ -67,6 +73,8 @@ public class LoginActivity extends AppCompatActivity {
                 bundle.putString("Username", username);
                 Intent iniciar=new Intent(LoginActivity.this, MainActivity.class);
                 iniciar.putExtras(bundle);
+                finish();
+                iniciandoSesion.dismiss();
                 startActivity(iniciar);
 
             }
