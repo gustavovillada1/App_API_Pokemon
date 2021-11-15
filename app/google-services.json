@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "343250603351",
+    "project_id": "aplicaciones-moviles-eedd1",
+    "storage_bucket": "aplicaciones-moviles-eedd1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343250603351:android:85b5906af379e214060212",
+        "android_client_info": {
+          "package_name": "com.example.reto_two"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "343250603351-40e3l21glrdfg0j6l91g83p9usgf7h0r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATTSVRYv3IdesqL_0N5Oz-cJYTsT3cdtQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "343250603351-40e3l21glrdfg0j6l91g83p9usgf7h0r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
