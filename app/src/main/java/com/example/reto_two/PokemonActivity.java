@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -58,12 +57,12 @@ public class PokemonActivity extends AppCompatActivity {
     private void llenarDatos(){
         Glide
                 .with(getApplicationContext())
-                .load(pokemon.getUrlFoto())
+                .load(pokemon.getSprites())
                 .into(img_foto_perfil_pokemon);
-        tv_perfil_nombre_pokemon.setText(pokemon.getNombre());
-        tv_perfil_defensa.setText(pokemon.getValorDefensa()+"");
-        tv_perfil_ataque.setText(pokemon.getValorAtaque()+"");
-        tv_perfil_velocidad.setText(pokemon.getValorVelocidad()+"");
-        tv_perfil_vida.setText(pokemon.getValorVida()+"");
+        tv_perfil_nombre_pokemon.setText(pokemon.getName()+"\n("+pokemon.getAbility()+")");
+        tv_perfil_defensa.setText(pokemon.getDefense()+"");
+        tv_perfil_ataque.setText(pokemon.getAttack()+"");
+        tv_perfil_velocidad.setText(pokemon.getSpeed()+"");
+        tv_perfil_vida.setText(pokemon.getHp()+"");
     }
 }

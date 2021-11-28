@@ -1,12 +1,17 @@
 package com.example.reto_two;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -54,10 +59,11 @@ public class HTTPSWebUtilDomi {
         }
     }
 
-    public String GETrequest(String url) {
+    public String GETrequest(String nombrePokemon) {
         try {
-            URL page = new URL(url);
+            URL page = new URL("https://pokeapi.co/api/v2/pokemon/"+nombrePokemon);
             HttpsURLConnection connection = (HttpsURLConnection) page.openConnection();
+            connection.setRequestMethod("GET");
             InputStream is = connection.getInputStream();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte[] buffer = new byte[4096];

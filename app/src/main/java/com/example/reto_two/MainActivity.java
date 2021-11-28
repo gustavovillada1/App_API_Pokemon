@@ -5,35 +5,38 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.reto_two.model.EntrenadorPokemon;
 import com.example.reto_two.model.Pokemon;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
+import com.example.reto_two.pokeapi.PokemonApi;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     private EditText et_atrapa_pokemon,et_buscar_pokemon;
     private Button btn_atrapar_pokemon,btn_buscar_pokemon;
     private RecyclerView recycler_pokemones;
+    private AdaptadorPokemon adaptadorPublicacion;
     private ArrayList<Pokemon> pokemonArrayList;
     private RelativeLayout relative_cagando;
+    private FirebaseFirestore dataBase;
+    private ProgressDialog capturandoProgressBar;
 
+    private String username;
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog dialog;
     boolean cargandoThread=true;
@@ -50,8 +53,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_buscar_pokemon = (Button) findViewById(R.id.btn_buscar_pokemon);
         recycler_pokemones = (RecyclerView) findViewById(R.id.recycler_pokemones);
         relative_cagando = (RelativeLayout) findViewById(R.id.relative_cagando);
+        capturandoProgressBar = new ProgressDialog(this);
 
         pokemonArrayList= new ArrayList<>();
+        dataBase =FirebaseFirestore.getInstance();
         recycler_pokemones.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
         btn_atrapar_pokemon.setOnClickListener(this);
@@ -60,11 +65,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Bundle usuarioExiste = getIntent().getExtras();
         if(usuarioExiste!=null){
             int existe= usuarioExiste.getInt("Existe");
-            String username = usuarioExiste.getString("Username");
+            this.username = usuarioExiste.getString("Username");
             adaptarDatosFirebase(existe,username);
         }else {
             finish();
         }
+    }
+
+    //    urlFoto,String idPokemon , String nombre, int valorDefensa, int valorVelocidad, int valorVida, int valorAtaque) {
+    private void atraparPokemon(String pokemonName){
+        et_atrapa_pokemon.setText("");
+
+        new Thread(
+                ()->{
+                    try{
+                        HTTPSWebUtilDomi utilDomi = new HTTPSWebUtilDomi();
+                        String json = utilDomi.GETrequest(pokemonName);
+                        Gson gson = new Gson();
+                        PokemonApi pokemonApi = gson.fromJson(json,PokemonApi.class);
+
+                        Pokemon pokemon= new Pokemon(
+                                pokemonApi.getSprites().getFront_default(),
+                                UUID.randomUUID().toString(),
+                                pokemonApi.getName(),
+                                pokemonApi.getAbilities()[0].getAbility().getName(),
+                                pokemonApi.getStats()[2].getBase_stat(),
+                                pokemonApi.getStats()[5].getBase_stat(),
+                                pokemonApi.getStats()[0].getBase_stat(),
+                                pokemonApi.getStats()[1].getBase_stat()
+                        );
+
+                        pokemonArrayList.add(pokemon);
+                        adaptadorPublicacion.setPokemons(pokemonArrayList);
+                        agregarPokemonAFirebase(pokemon);
+
+                    }catch (Exception e){
+
+                        runOnUiThread(
+                                ()->{
+                                    Toast.makeText(this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                                }
+                        );
+                    }
+                }
+        ).start();
+
+
+    }
+
+    private void agregarPokemonAFirebase(Pokemon pokemon){
+        dataBase.collection("Usuarios").document(username).collection("Pokemones").document(pokemon.getId()).set(pokemon);
+    }
+
+    private void obtenerPokemonesDeFirebase(){
+        dataBase.collection("Usuarios").document(username).collection("Pokemones").get().addOnCompleteListener(
+          task -> {
+              for(DocumentSnapshot snapshot: task.getResult()){
+                  Pokemon pokemon = snapshot.toObject(Pokemon.class);
+                  this.pokemonArrayList.add(pokemon);
+              }
+          }
+        );
+        llenarRecycler();
     }
 
     /**
@@ -76,23 +138,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void adaptarDatosFirebase(int existe, String username){
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         switch (existe){
             case EntrenadorPokemon.USUARIO_EXISTE:
                 relative_cagando.setVisibility(View.VISIBLE);
-                db.collection("Usuarios").document(username).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-
-                        if(documentSnapshot.exists()){
-                            EntrenadorPokemon e = documentSnapshot.toObject(EntrenadorPokemon.class);
-
-                            llenarPublicaciones(e.getPokemons());
-                        }
-
-                    }
-                });
+                obtenerPokemonesDeFirebase();
 
                 break;
 
@@ -100,38 +149,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 mensajeBienvenida(username);
 
-                ArrayList<Pokemon> pkms = new ArrayList();
-                pkms.add(new Pokemon("http://assets.stickpng.com/images/580b57fcd9996e24bc43c325.png",150,"Pikachu",100,120,200,123));
-                EntrenadorPokemon e = new EntrenadorPokemon(username,pkms);
-                db.collection("Usuarios").document(username).set(e);
+                EntrenadorPokemon e = new EntrenadorPokemon(username);
+                dataBase.collection("Usuarios").document(username).set(e);
+                llenarRecycler();
                 break;
         }
-
-    }
-
-
-    private void llenarPublicaciones(ArrayList<Pokemon> pokemons) {
-
-
-
-        AdaptadorPokemon adaptadorPublicacion=new AdaptadorPokemon(pokemons,getApplicationContext(),MainActivity.this);
-
-        adaptadorPublicacion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Pokemon pokemon = pokemons.get(recycler_pokemones.getChildAdapterPosition(v));
-
-                Bundle bundle= new Bundle();
-                bundle.putSerializable("Pokemon",pokemon);
-
-                Intent abrirPerfilPokemon=new Intent(getApplicationContext(), PokemonActivity.class);
-                abrirPerfilPokemon.putExtras(bundle);
-                startActivity(abrirPerfilPokemon);
-
-            }
-        });
-        recycler_pokemones.setAdapter(adaptadorPublicacion);
 
         new Thread(
                 ()-> {
@@ -150,6 +172,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
         ).start();
+
+    }
+
+
+    private void llenarRecycler() {
+
+        adaptadorPublicacion=new AdaptadorPokemon(this.pokemonArrayList,getApplicationContext(),MainActivity.this);
+
+        adaptadorPublicacion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Pokemon pokemon = pokemonArrayList.get(recycler_pokemones.getChildAdapterPosition(v));
+
+                Bundle bundle= new Bundle();
+                bundle.putSerializable("Pokemon",pokemon);
+
+                Intent abrirPerfilPokemon=new Intent(getApplicationContext(), PokemonActivity.class);
+                abrirPerfilPokemon.putExtras(bundle);
+                startActivity(abrirPerfilPokemon);
+
+            }
+        });
+        recycler_pokemones.setAdapter(adaptadorPublicacion);
+
+
     }
 
 
@@ -176,23 +224,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.btn_atrapar_pokemon:
 
+                capturandoProgressBar.setMessage("Atrapando Pokémon...");
+                capturandoProgressBar.show();
                 String pokemonAtrapar = et_atrapa_pokemon.getText().toString();
                 if(!pokemonAtrapar.equals("")){
-                    atraparPokemonHTTP(pokemonAtrapar);
+                    atraparPokemon(pokemonAtrapar);
                 }else {
                     Toast.makeText(getApplicationContext(),"Por favor ingresa un nombre válido",Toast.LENGTH_SHORT).show();
                 }
+                capturandoProgressBar.dismiss();
                 break;
 
         }
     }
 
-    private void atraparPokemonHTTP(String pokemonAtrapar) {
-        new Thread(
-                ()->{
-                    HTTPSWebUtilDomi h = new HTTPSWebUtilDomi();
-                    h.GETrequest("https://geogameicesi.herokuapp.com/api/geo/set");
-                }
-        ).start();
-    }
+
 }

@@ -4,78 +4,88 @@ import java.io.Serializable;
 
 public class Pokemon implements Serializable {
 
-    private String urlFoto;
-    private int idPokemon;
-    private String nombre;
-    private int valorDefensa, valorVelocidad, valorVida, valorAtaque;
+    private String sprites;
+    private String id;
+    private String name;
+    private String ability;
+    private String defense, speed, hp, attack;
 
     public Pokemon(){
 
     }
 
-    public Pokemon(String urlFoto,int idPokemon , String nombre, int valorDefensa, int valorVelocidad, int valorVida, int valorAtaque) {
-        this.urlFoto = urlFoto;
-        this.idPokemon = idPokemon;
-        this.nombre = nombre;
-        this.valorDefensa = valorDefensa;
-        this.valorVelocidad = valorVelocidad;
-        this.valorVida = valorVida;
-        this.valorAtaque = valorAtaque;
+    public Pokemon(String urlFoto,String idPokemon , String nombre, String habilidad,String valorDefensa, String valorVelocidad, String valorVida, String valorAtaque) {
+        this.sprites = urlFoto;
+        this.id = idPokemon;
+        this.name = nombre;
+        this.ability =habilidad;
+        this.defense = valorDefensa;
+        this.speed = valorVelocidad;
+        this.hp = valorVida;
+        this.attack = valorAtaque;
     }
 
-    public int getIdPokemon() {
-        return idPokemon;
+    public String getId() {
+        return id;
     }
 
-    public void setIdPokemon(int idPokemon) {
-        this.idPokemon = idPokemon;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getUrlFoto() {
-        return urlFoto;
+    public String getSprites() {
+        return sprites;
     }
 
-    public void setUrlFoto(String urlFoto) {
-        this.urlFoto = urlFoto;
+    public void setSprites(String sprites) {
+        this.sprites = sprites;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getValorDefensa() {
-        return valorDefensa;
+    public String getDefense() {
+        return defense;
     }
 
-    public void setValorDefensa(int valorDefensa) {
-        this.valorDefensa = valorDefensa;
+    public void setDefense(String defense) {
+        this.defense = defense;
     }
 
-    public int getValorVelocidad() {
-        return valorVelocidad;
+    public String getSpeed() {
+        return speed;
     }
 
-    public void setValorVelocidad(int valorVelocidad) {
-        this.valorVelocidad = valorVelocidad;
+    public void setSpeed(String speed) {
+        this.speed = speed;
     }
 
-    public int getValorVida() {
-        return valorVida;
+    public String getHp() {
+        return hp;
     }
 
-    public void setValorVida(int valorVida) {
-        this.valorVida = valorVida;
+    public void setHp(String hp) {
+        this.hp = hp;
     }
 
-    public int getValorAtaque() {
-        return valorAtaque;
+    public String getAttack() {
+        return attack;
     }
 
-    public void setValorAtaque(int valorAtaque) {
-        this.valorAtaque = valorAtaque;
+    public void setAttack(String attack) {
+        this.attack = attack;
+    }
+
+    public String getAbility() {
+        return ability;
+    }
+
+    public void setAbility(String ability) {
+        this.ability = ability;
     }
 }

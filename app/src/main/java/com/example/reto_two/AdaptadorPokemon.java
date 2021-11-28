@@ -2,7 +2,6 @@ package com.example.reto_two;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,7 @@ import com.example.reto_two.model.Pokemon;
 import java.util.ArrayList;
 
 public class AdaptadorPokemon extends RecyclerView.Adapter<AdaptadorPokemon.ViewHolderPokemon> implements View.OnClickListener{
-    ArrayList<Pokemon> pokemons;
+    private ArrayList<Pokemon> pokemons;
     private  View.OnClickListener listener;
     private Context c;
     private Activity activity;
@@ -42,10 +41,10 @@ public class AdaptadorPokemon extends RecyclerView.Adapter<AdaptadorPokemon.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolderPokemon holder, int position) {
 
-        holder.tv_recycler_nombre.setText(pokemons.get(position).getNombre());
+        holder.tv_recycler_nombre.setText(pokemons.get(position).getName());
         Glide
                 .with(c)
-                .load(pokemons.get(position).getUrlFoto())
+                .load(pokemons.get(position).getSprites())
                 .into(holder.img_recycler_foto);
 
         new Thread( ()->{
@@ -109,5 +108,13 @@ public class AdaptadorPokemon extends RecyclerView.Adapter<AdaptadorPokemon.View
 
 
         }
+    }
+
+    public ArrayList<Pokemon> getPokemons() {
+        return pokemons;
+    }
+
+    public void setPokemons(ArrayList<Pokemon> pokemons) {
+        this.pokemons = pokemons;
     }
 }
