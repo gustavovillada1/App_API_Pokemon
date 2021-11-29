@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void obtenerPokemonesDeFirebase(){
         dataBase.collection("Usuarios").document(username).collection("Pokemones").get().addOnCompleteListener(
           task -> {
-
+              
               for(DocumentSnapshot snapshot: task.getResult()){
                   Pokemon pokemon = snapshot.toObject(Pokemon.class);
                   adaptadorPokemon.addPokemon(pokemon);
