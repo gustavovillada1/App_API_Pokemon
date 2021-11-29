@@ -5,12 +5,21 @@ import java.io.Serializable;
 public class PokemonApi implements Serializable {
 
     private String name;
+    private String id;
     private Abilities[] abilities;
     private Stats[] stats;
     private Sprites sprites;
 
     public PokemonApi(){
 
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

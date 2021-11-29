@@ -16,19 +16,40 @@ import com.bumptech.glide.Glide;
 import com.example.reto_two.model.Pokemon;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class AdaptadorPokemon extends RecyclerView.Adapter<AdaptadorPokemon.ViewHolderPokemon> implements View.OnClickListener{
     private ArrayList<Pokemon> pokemons;
     private  View.OnClickListener listener;
     private Context c;
-    private Activity activity;
 
-    public AdaptadorPokemon(ArrayList<Pokemon> pokemons, Context c, Activity activity) {
-        this.pokemons = pokemons;
+    public AdaptadorPokemon( Context c) {
+        this.pokemons = new ArrayList<>();
         this.c=c;
-        this.activity = activity;
     }
 
+    public void addPokemon(Pokemon p){
+        this.pokemons.add(p);
+        notifyItemInserted(pokemons.size());
+    }
+
+
+    public void removePokemon(String pokemonId){
+        for(int i=0;i<this.pokemons.size();i++){
+            if(this.pokemons.get(i).getId().equals(pokemonId)){
+                this.pokemons.remove(i);
+                notifyItemRemoved(i);
+            }
+        }
+    }
+
+    /**
+     * Nos permite agregar el esqueleto del recyclerview
+     * @param parent
+     * @param viewType
+     * @return
+     */
     @NonNull
     @Override
     public ViewHolderPokemon onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -38,31 +59,17 @@ public class AdaptadorPokemon extends RecyclerView.Adapter<AdaptadorPokemon.View
         return new ViewHolderPokemon(view);
     }
 
+    /**
+     * Nos permite agregar información al esqueleto del recyclerview
+     * @param holder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolderPokemon holder, int position) {
+        Pokemon p = pokemons.get(position);
 
-        holder.tv_recycler_nombre.setText(pokemons.get(position).getName());
-        Glide
-                .with(c)
-                .load(pokemons.get(position).getSprites())
-                .into(holder.img_recycler_foto);
-
-        new Thread( ()->{
-            while(true){
-                try {
-                    Thread.sleep(1000);
-                    activity.runOnUiThread(
-                            ()->{
-                                holder.progressBar3.setVisibility(View.GONE);
-                            }
-                    );
-
-                    break;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        holder.getTv_recycler_nombre().setText(p.getName());
+        Glide.with(c).load(p.getSprites()).into(holder.getImg_recycler_foto());
 
 
     }
@@ -93,21 +100,30 @@ public class AdaptadorPokemon extends RecyclerView.Adapter<AdaptadorPokemon.View
 
     public class ViewHolderPokemon extends RecyclerView.ViewHolder{
 
-        TextView tv_recycler_nombre;
-        ImageView img_recycler_foto;
-        ProgressBar progressBar3;
+        private TextView tv_recycler_nombre;
+        private ImageView img_recycler_foto;
+        private ProgressBar progressBar3;
 
 
         public ViewHolderPokemon(@NonNull View itemView) {
 
             super(itemView);
-            progressBar3 = (ProgressBar) itemView.findViewById(R.id.progressBar3);
             img_recycler_foto=(ImageView) itemView.findViewById(R.id.img_recycler_foto);
             tv_recycler_nombre=(TextView) itemView.findViewById(R.id.tv_recycler_nombre);
-
-
-
         }
+
+        public TextView getTv_recycler_nombre() {
+            return tv_recycler_nombre;
+        }
+
+        public ImageView getImg_recycler_foto() {
+            return img_recycler_foto;
+        }
+
+        public ProgressBar getProgressBar3() {
+            return progressBar3;
+        }
+
     }
 
     public ArrayList<Pokemon> getPokemons() {
@@ -117,4 +133,6 @@ public class AdaptadorPokemon extends RecyclerView.Adapter<AdaptadorPokemon.View
     public void setPokemons(ArrayList<Pokemon> pokemons) {
         this.pokemons = pokemons;
     }
+
+
 }

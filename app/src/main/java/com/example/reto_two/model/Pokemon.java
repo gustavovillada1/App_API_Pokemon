@@ -6,6 +6,7 @@ public class Pokemon implements Serializable {
 
     private String sprites;
     private String id;
+    private String idNumber;
     private String name;
     private String ability;
     private String defense, speed, hp, attack;
@@ -14,9 +15,10 @@ public class Pokemon implements Serializable {
 
     }
 
-    public Pokemon(String urlFoto,String idPokemon , String nombre, String habilidad,String valorDefensa, String valorVelocidad, String valorVida, String valorAtaque) {
+    public Pokemon(String urlFoto,String idPokemon , String idNumber,  String nombre, String habilidad,String valorDefensa, String valorVelocidad, String valorVida, String valorAtaque) {
         this.sprites = urlFoto;
         this.id = idPokemon;
+        this.idNumber = idNumber;
         this.name = nombre;
         this.ability =habilidad;
         this.defense = valorDefensa;
@@ -83,6 +85,14 @@ public class Pokemon implements Serializable {
 
     public String getAbility() {
         return ability;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
     }
 
     public void setAbility(String ability) {
